@@ -1,0 +1,31 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug VersatilePB (QEMU)",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/bin/application.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "qemu",
+            "machine": "versatilepb",
+            "cpu": "arm926ej-s",
+            "runToEntryPoint": "main",
+            "preLaunchTask": "Build Versatile",
+            "showDevDebugOutput": "raw"
+        },
+        {
+            "name": "Debug BeagleBone (QEMU)",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/bin/application.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "qemu",
+            "machine": "beagle",
+            "cpu": "cortex-a8",
+            "runToEntryPoint": "main",
+            "preLaunchTask": "Build Beagle",
+            "showDevDebugOutput": "raw"
+        }
+    ]
+}

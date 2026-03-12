@@ -1,0 +1,22 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Versatile",
+            "type": "shell",
+            "command": "./build.sh versatile only_build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Build Beagle",
+            "type": "shell",
+            "command": "./build.sh beagle only_build",
+            "group": {
+                "kind": "build"
+            }
+        }
+    ]
+}
