@@ -2,6 +2,7 @@
 bin/
 out/
 build/
+log_analyzer
 
 # Logs
 logs/

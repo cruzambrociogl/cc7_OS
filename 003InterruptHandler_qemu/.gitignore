@@ -1,0 +1,4 @@
+Code/bin/
+*.docx
+*.pdf
+!00*.pdf
