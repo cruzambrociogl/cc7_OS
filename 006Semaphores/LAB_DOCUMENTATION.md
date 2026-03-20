@@ -24,10 +24,10 @@ All events are logged to both the terminal and a `parking_log.log` file.
 This models parking systems in airports, shopping centers, and smart cities — anywhere that parking capacity is limited and concurrent access needs coordination:
 
 ```
-           ┌───────────────────────────────────┐
+           ┌───────────────────────────────────-┐
            │         PARKING LOT (N=3)          │
            │                                    │
-           │   [Spot 1]   [Spot 2]   [Spot 3]  │
+           │   [Spot 1]   [Spot 2]   [Spot 3]   │
            │                                    │
            └──────────────┬─────────────────────┘
                           │
@@ -103,7 +103,7 @@ Count: 3 ─┐
 ### Car Thread Lifecycle
 
 ```
-┌─────────────────────────────────────────────────┐
+┌───────────────────────────────────────────────────┐
 │                  car_thread(id)                   │
 │                                                   │
 │  1. Log "Arrived at parking lot"                  │
@@ -125,7 +125,7 @@ Count: 3 ─┐
 │  8. Log "Leaving parking lot"                     │
 │         │                                         │
 │  9. sem_post(parking_semaphore)  ← frees spot     │
-└─────────────────────────────────────────────────┘
+└───────────────────────────────────────────────────┘
 ```
 
 ### Thread-Safe Logging

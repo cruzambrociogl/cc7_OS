@@ -36,6 +36,9 @@ ParkingStats stats = {0, 0.0};
 /* Log file — all events are written here in addition to stdout */
 FILE *log_file;
 
+/* Speed multiplier — controlled via command-line argument */
+double speed_multiplier = DEFAULT_SPEED;
+
 /*
  * log_event() — print a timestamped, thread-safe log message.
  *
@@ -57,6 +60,7 @@ void log_event(const char *message) {
 
     printf("[%s] %s\n", timestamp, message);
     fprintf(log_file, "[%s] %s\n", timestamp, message);
+    fflush(log_file);  /* Flush so the dashboard can read events in real-time */
 
     pthread_mutex_unlock(&log_mutex);
 }
@@ -127,9 +131,12 @@ void *car_thread(void *arg) {
     /*
      * Simulate the car being parked for 1-5 seconds.
      * rand() % 5 gives 0-4, so +1 gives 1-5.
+     * The duration is divided by speed_multiplier so the simulation
+     * can run faster (speed > 1) or slower (speed < 1).
+     * usleep takes microseconds, so we multiply by 1,000,000.
      */
     int park_duration = (rand() % 5) + 1;
-    sleep(park_duration);
+    usleep((useconds_t)(park_duration * 1000000 / speed_multiplier));
 
     /* --- Step 4: Leave --- */
     sprintf(message, "Car %d: Leaving parking lot", car_id);
@@ -158,7 +165,22 @@ void *car_thread(void *arg) {
  *   5. Print statistics
  *   6. Clean up
  */
-int main(void) {
+int main(int argc, char *argv[]) {
+    /*
+     * Optional argument: speed multiplier.
+     *   ./parking_lot        → normal speed (1x)
+     *   ./parking_lot 2      → twice as fast
+     *   ./parking_lot 0.5    → half speed (slower, good for demos)
+     *   ./parking_lot 10     → 10x speed (finishes quickly)
+     */
+    if (argc > 1) {
+        speed_multiplier = atof(argv[1]);
+        if (speed_multiplier <= 0) {
+            fprintf(stderr, "Speed must be > 0 (e.g., 0.5, 1, 2, 10)\n");
+            return 1;
+        }
+    }
+
     /* Seed rand() so each run produces different parking durations */
     srand(time(NULL));
 
@@ -190,7 +212,10 @@ int main(void) {
     pthread_t threads[NUM_CARS];
 
     printf("Smart Parking Lot Simulation\n");
-    printf("Parking spaces: %d | Cars: %d\n\n", PARKING_SPACES, NUM_CARS);
+    printf("Parking spaces: %d | Cars: %d | Speed: %.1fx\n\n", PARKING_SPACES, NUM_CARS, speed_multiplier);
+    fprintf(log_file, "Smart Parking Lot Simulation\n");
+    fprintf(log_file, "Parking spaces: %d | Cars: %d | Speed: %.1fx\n\n", PARKING_SPACES, NUM_CARS, speed_multiplier);
+    fflush(log_file);
 
     /* Create all car threads — they start running immediately */
     for (int i = 0; i < NUM_CARS; i++) {

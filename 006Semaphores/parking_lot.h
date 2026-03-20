@@ -3,6 +3,7 @@
 
 #define NUM_CARS 10        /* Total number of car threads to simulate */
 #define PARKING_SPACES 3   /* Number of available parking spots (N) */
+#define DEFAULT_SPEED 1.0  /* Speed multiplier: 2.0 = twice as fast, 0.5 = half speed */
 
 /*
  * ParkingStats — shared counters protected by stats_mutex.
