@@ -43,20 +43,20 @@ P2_BIN="out/p2.bin"
 P2_ADDR="0x82200000"
 
 # ---- Check prerequisites ----
-if command -v lsb &> /dev/null; then
-    SB_CMD="lsb"
-elif command -v sb &> /dev/null; then
-    SB_CMD="sb"
-elif command -v sz &> /dev/null; then
-    SB_CMD="sz --ymodem"
-else
-    echo "ERROR: ymodem send (sb/lsb/sz) not found."
-    if $IS_WINDOWS; then
-        echo "Install lrzsz-win32: https://github.com/trzsz/lrzsz-win32/releases"
+# On Windows, ymodem_send.py handles all transfers — lrzsz not needed.
+# On Linux/macOS, sb/lsb/sz (lrzsz) is required.
+if ! $IS_WINDOWS; then
+    if command -v lsb &> /dev/null; then
+        SB_CMD="lsb"
+    elif command -v sb &> /dev/null; then
+        SB_CMD="sb"
+    elif command -v sz &> /dev/null; then
+        SB_CMD="sz --ymodem"
     else
+        echo "ERROR: ymodem send (sb/lsb/sz) not found."
         echo "Install with: brew install lrzsz"
+        exit 1
     fi
-    exit 1
 fi
 
 # ---- Check serial port ----
@@ -133,20 +133,9 @@ send_binary_mac() {
 
 # ---- Step 2: Connect and deploy ----
 if $IS_WINDOWS; then
-    (while true; do echo -n " " > "$SERIAL_DEV"; sleep 0.1; done) &
-    SPAM_PID=$!
-
-    echo ">>> Press RESET on BeagleBone, then press ENTER here <<<"
-    read -r
-
-    echo "Interrupting U-Boot autoboot..."
-    sleep 2
-
-    kill $SPAM_PID 2>/dev/null || true
-    wait $SPAM_PID 2>/dev/null || true
-    sleep 0.5
-
-    # Windows: Python handles all 3 transfers
+    # On Windows /dev/ttySx is not writable from bash — Python (pyserial) owns
+    # the serial port entirely: it opens COM7, spams spaces to interrupt U-Boot,
+    # waits for the => prompt, then sends all 3 binaries via ymodem.
     python "$SCRIPT_DIR/ymodem_send.py" "$SERIAL_PORT" "$BAUD_RATE" \
         "$OS_BIN" "$OS_ADDR" "$P1_BIN" "$P1_ADDR" "$P2_BIN" "$P2_ADDR"
 else
