@@ -37,6 +37,16 @@ static void wdt_disable(void) {
 #define CM_PER_BASE      0x44E00000
 #define CM_PER_TIMER2_CLKCTRL (CM_PER_BASE + 0x80)
 
+// ============================================================================
+// Quantum Configuration
+// Change QUANTUM_MS to set the time slice for each process (in milliseconds)
+// Formula: TIMER_LOAD = 0xFFFFFFFF - (QUANTUM_MS * TICKS_PER_MS) + 1
+// ============================================================================
+#define TIMER_FREQ_HZ    24000000
+#define TICKS_PER_MS     (TIMER_FREQ_HZ / 1000)
+#define QUANTUM_MS       1000
+#define TIMER_LOAD_VALUE (0xFFFFFFFF - (QUANTUM_MS * TICKS_PER_MS) + 1)
+
 void timer_init(void) {
     // Disable watchdog first
     wdt_disable();
@@ -56,11 +66,11 @@ void timer_init(void) {
     // Clear any pending interrupts
     PUT32(TISR, 0x7);
 
-    // Set load value (~1 second at 24MHz)
-    PUT32(TLDR, 0xFE91CA00);
+    // Set load value (QUANTUM_MS ms at 24MHz)
+    PUT32(TLDR, TIMER_LOAD_VALUE);
 
     // Set counter to same value
-    PUT32(TCRR, 0xFE91CA00);
+    PUT32(TCRR, TIMER_LOAD_VALUE);
 
     // Enable overflow interrupt
     PUT32(TIER, 0x2);
